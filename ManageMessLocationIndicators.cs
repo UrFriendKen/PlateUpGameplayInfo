@@ -36,6 +36,13 @@ namespace KitchenGameplayInfo
 
         protected override void OnUpdate()
         {
+            if (!Has<SIsNightTime>())
+            {
+                if (!MessIndicators.IsEmpty)
+                    EntityManager.DestroyEntity(MessIndicators);
+                return;
+            }
+
             _indicatorPositions.Clear();
             List<LayoutPosition> searchOffsets = HasStatus(RestaurantStatus.MessRangeIncrease) ? LayoutHelpers.AllNearbyRange2 : LayoutHelpers.AllNearby;
 
