@@ -1,7 +1,6 @@
 ﻿using HarmonyLib;
 using Kitchen;
 using KitchenData;
-using KitchenLib.References;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -23,7 +22,6 @@ namespace KitchenGameplayInfo.Patches
         {
             if (_container == null)
             {
-                Main.LogInfo("Create Container");
                 _container = new GameObject("GameplayInfo Container");
                 _container.SetActive(false);
                 _prefabs = new Dictionary<ViewType, GameObject>();

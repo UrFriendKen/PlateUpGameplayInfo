@@ -2,6 +2,7 @@
 using KitchenData;
 using KitchenMods;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
@@ -48,7 +49,10 @@ namespace KitchenGameplayInfo
 
         public Color DefaultMessColor = new Color(0.42f, 0.71f, 0.19f);
 
-        public Dictionary<int, Color> CustomMessColors = new Dictionary<int, Color>();
+        static Dictionary<int, Color> _customMessColors = new Dictionary<int, Color>()
+        {
+            { 377065033, new Color(0f, 0.8f, 0.8f) }
+        };
 
         public GameObject DefaultMessPrefab;
 
@@ -88,7 +92,25 @@ namespace KitchenGameplayInfo
             if (data.ApplianceID == 0)
                 data.ApplianceID = Main.DEFAULT_MESS_INDICATOR_ID;
 
-            GameObject prefab = GameData.Main.TryGet(data.ApplianceID, out Appliance appliance, warn_if_fail: true) ? (appliance.Prefab ?? DefaultMessPrefab) : DefaultMessPrefab;
+            GameObject prefab = null;
+            if (Main.PrefManager.Get<bool>(Main.MESS_INDICATOR_USE_MAX_SIZE_ID))
+            {
+                int nextMessID = data.ApplianceID;
+                HashSet<int> seenMessIDs = new HashSet<int>();
+                while (GameData.Main.TryGet(nextMessID, out Appliance appliance) &&
+                    appliance.Prefab != default &&
+                    !seenMessIDs.Contains(nextMessID))
+                {
+                    seenMessIDs.Add(nextMessID);
+                    prefab = appliance.Prefab;
+                    nextMessID = appliance.Properties.Where(x => x.GetType() == typeof(CStackableMess)).Cast<CStackableMess>().FirstOrDefault().NextMess;
+                }
+            }
+            else if (GameData.Main.TryGet(data.ApplianceID, out Appliance appliance, warn_if_fail: true) &&
+                appliance.Prefab != default)
+            {
+                prefab = appliance.Prefab;
+            }
 
             if (prefab == null)
             {
@@ -100,7 +122,7 @@ namespace KitchenGameplayInfo
             MessGO.transform.SetParent(Container.transform);
             MessGO.transform.Reset();
 
-            Color color = CustomMessColors.TryGetValue(data.ApplianceID, out Color customColor) ? customColor : DefaultMessColor;
+            Color color = _customMessColors.TryGetValue(data.ApplianceID, out Color customColor) ? customColor : DefaultMessColor;
 
             foreach (MeshRenderer meshRenderer in MessGO.GetComponentsInChildren<MeshRenderer>())
             {

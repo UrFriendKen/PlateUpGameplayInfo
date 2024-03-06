@@ -13,14 +13,15 @@ namespace KitchenGameplayInfo
     {
         public const string MOD_GUID = $"IcedMilo.PlateUp.{MOD_NAME}";
         public const string MOD_NAME = "GameplayInfo";
-        public const string MOD_VERSION = "0.1.1";
+        public const string MOD_VERSION = "0.1.2";
 
         internal const string CHAIR_ORDER_SHOW_CONDITION_ID = "chairOrderShowCondition";
         internal static readonly ViewType ChairOrderIndicatorViewType = (ViewType)HashUtils.GetID($"{MOD_GUID}:chairOrderIndicator");
 
         internal const string MESS_INDICATOR_SHOW_CONDITION_ID = "messIndicatorShowCondition";
+        internal const string MESS_INDICATOR_USE_MAX_SIZE_ID = "messIndicatorUseMaxSize";
         internal static readonly ViewType MessIndicatorViewType = (ViewType)HashUtils.GetID($"{MOD_GUID}:messIndicator");
-        internal const int DEFAULT_MESS_INDICATOR_ID = 147181555;
+        internal const int DEFAULT_MESS_INDICATOR_ID = -1324288299; //147181555;
 
         internal static PreferenceSystemManager PrefManager;
         
@@ -53,6 +54,12 @@ namespace KitchenGameplayInfo
                     ShowCondition.Always,
                     new ShowCondition[] { ShowCondition.Never, ShowCondition.Always },
                     new string[] { "Disabled", "Enabled" })
+                .AddLabel("Mess Size Display")
+                .AddOption<bool>(
+                    MESS_INDICATOR_USE_MAX_SIZE_ID,
+                    false,
+                    new bool[] { false, true },
+                    new string[] { "Minimum Size", "Maximum Size" })
                 .AddSpacer()
                 .AddSpacer();
 
