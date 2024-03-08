@@ -1,6 +1,7 @@
 ﻿using Kitchen;
 using KitchenData;
 using KitchenMods;
+using MessagePack;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Collections;
@@ -37,9 +38,10 @@ namespace KitchenGameplayInfo
             }
         }
 
+        [MessagePackObject(false)]
         public class ViewData : IViewData, IViewData.ICheckForChanges<ViewData>
         {
-            public int ApplianceID;
+            [Key(0)] public int ApplianceID;
 
             public bool IsChangedFrom(ViewData check)
             {
