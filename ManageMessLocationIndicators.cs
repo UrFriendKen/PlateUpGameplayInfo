@@ -66,9 +66,13 @@ namespace KitchenGameplayInfo
                 int maxGroupSize = kitchenParameters.Parameters.MaximumGroupSize;
 
                 using NativeArray<Entity> tableSetEntities = TableSets.ToEntityArray(Allocator.Temp);
+                using NativeArray<CTableSet> tableSets = TableSets.ToComponentDataArray<CTableSet>(Allocator.Temp);
 
                 for (int i = 0; i < tableSetEntities.Length; i++)
                 {
+                    if (tableSets[i].IsWaitingTable)
+                        continue;
+
                     DynamicBuffer<CTablePlace> tablePlaces = GetBuffer<CTablePlace>(tableSetEntities[i]);
                     int occupiedChairCount = 0;
                     for (int placeIndex = 0; placeIndex < tablePlaces.Length && occupiedChairCount < maxGroupSize; placeIndex++)
