@@ -4,7 +4,6 @@ using KitchenGameplayInfo.Utils;
 using KitchenMods;
 using PreferenceSystem;
 using System.Reflection;
-using UnityEngine;
 
 // Namespace should have "Kitchen" in the beginning
 namespace KitchenGameplayInfo
@@ -13,13 +12,15 @@ namespace KitchenGameplayInfo
     {
         public const string MOD_GUID = $"IcedMilo.PlateUp.{MOD_NAME}";
         public const string MOD_NAME = "GameplayInfo";
-        public const string MOD_VERSION = "0.1.4";
+        public const string MOD_VERSION = "0.1.5";
 
         internal const string CHAIR_ORDER_SHOW_CONDITION_ID = "chairOrderShowCondition";
         internal static readonly ViewType ChairOrderIndicatorViewType = (ViewType)HashUtils.GetID($"{MOD_GUID}:chairOrderIndicator");
 
         internal const string MESS_INDICATOR_SHOW_CONDITION_ID = "messIndicatorShowCondition";
         internal const string MESS_INDICATOR_USE_MAX_SIZE_ID = "messIndicatorUseMaxSize";
+        internal const string CUSTOMER_VIEW_CONE_SHOW_CONDITION_ID = "customerViewConeShowCondition";
+        internal const string PREVIEW_APPLIANCES_SHOW_CONDITION_ID = "previewAppliancesShowCondition";
         internal static readonly ViewType MessIndicatorViewType = (ViewType)HashUtils.GetID($"{MOD_GUID}:messIndicator");
         internal const int DEFAULT_MESS_INDICATOR_ID = -1324288299; //147181555;
 
@@ -60,6 +61,18 @@ namespace KitchenGameplayInfo
                     false,
                     new bool[] { false, true },
                     new string[] { "Minimum Size", "Maximum Size" })
+                .AddLabel("Show Customer View Cone")
+                .AddOption<ShowCondition>(
+                    CUSTOMER_VIEW_CONE_SHOW_CONDITION_ID,
+                    ShowCondition.Always,
+                    new ShowCondition[] { ShowCondition.Never, ShowCondition.Always },
+                    new string[] { "Disabled", "Enabled" })
+                .AddLabel("Show Appliances in Preview")
+                .AddOption<ShowCondition>(
+                    PREVIEW_APPLIANCES_SHOW_CONDITION_ID,
+                    ShowCondition.Always,
+                    new ShowCondition[] { ShowCondition.Never, ShowCondition.Always },
+                    new string[] { "Disabled", "Enabled" })
                 .AddSpacer()
                 .AddSpacer();
 
