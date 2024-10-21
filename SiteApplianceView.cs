@@ -4,7 +4,6 @@ using KitchenMods;
 using MessagePack;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
@@ -95,15 +94,16 @@ namespace KitchenGameplayInfo
         }
 
         [Serializable]
+        [MessagePackObject(false)]
         public struct AppliancePlacementData
         {
-            public int ApplianceID;
-            public Vector3 Position;
-            public Quaternion Rotation;
+            [Key(0)] public int ApplianceID;
+            [Key(1)] public Vector3 Position;
+            [Key(2)] public Quaternion Rotation;
         }
 
         [MessagePackObject(false)]
-        public struct ViewData : ISpecificViewData, IViewData.ICheckForChanges<ViewData>
+        public struct ViewData : ISpecificViewData, IViewData, IViewData.ICheckForChanges<ViewData>
         {
             [Key(0)] public List<AppliancePlacementData> Appliances;
 
