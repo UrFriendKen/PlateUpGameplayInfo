@@ -140,11 +140,11 @@ namespace KitchenGameplayInfo
         private bool IsMessPossible(Vector3 source, Vector3 target)
         {
             if (target == GetFrontDoor() ||
-                GetOccupant(target, OccupancyLayer.Floor) != default ||
-                !CanReach(source, target))
+                TileManager.GetOccupant(target, OccupancyLayer.Floor) != default ||
+                !TileManager.CanReach(source, target))
                 return false;
 
-            Entity occupant = GetOccupant(target, OccupancyLayer.Default);
+            Entity occupant = TileManager.GetOccupant(target, OccupancyLayer.Default);
             if (occupant != default &&
                 (!Require(occupant, out CApplianceGhostChair occupantGhostChair) ||
                 (!occupantGhostChair.IsDisabled &&

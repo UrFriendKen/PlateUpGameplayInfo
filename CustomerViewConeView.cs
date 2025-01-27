@@ -3,7 +3,6 @@ using KitchenData;
 using KitchenMods;
 using MessagePack;
 using System.Collections.Generic;
-using TwitchLib.Api.Core.Models.Undocumented.ChannelPanels;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;

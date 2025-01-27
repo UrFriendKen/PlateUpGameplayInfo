@@ -36,6 +36,12 @@
 	  <None Remove="plateup_mod_metadata.json" />
 	  <None Remove="*.png" />
 	</ItemGroup>
+	<ItemGroup>
+	  <Compile Remove="Patches\TranspilerTemplate_Patch.cs" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Include="Patches\TranspilerTemplate_Patch.cs" />
+	</ItemGroup>
   
 	<ItemGroup>
 		<PackageReference Include="MessagePack.Annotations" Version="2.4.59" />

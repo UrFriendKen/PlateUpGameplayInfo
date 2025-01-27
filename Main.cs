@@ -1,5 +1,7 @@
 ﻿using HarmonyLib;
 using Kitchen;
+using KitchenData;
+using KitchenGameplayInfo.Extensions;
 using KitchenGameplayInfo.Utils;
 using KitchenMods;
 using PreferenceSystem;
@@ -12,10 +14,13 @@ namespace KitchenGameplayInfo
     {
         public const string MOD_GUID = $"IcedMilo.PlateUp.{MOD_NAME}";
         public const string MOD_NAME = "GameplayInfo";
-        public const string MOD_VERSION = "0.1.6";
+        public const string MOD_VERSION = "0.1.7";
 
         internal const string CHAIR_ORDER_SHOW_CONDITION_ID = "chairOrderShowCondition";
         internal static readonly ViewType ChairOrderIndicatorViewType = (ViewType)HashUtils.GetID($"{MOD_GUID}:chairOrderIndicator");
+
+        internal const string SHOW_END_OF_DAY_DISH_DETAILS_ID = "showEndOfDayDishDetails";
+        internal const string SHOW_DESK_TARGET_INDICATOR_ID = "showDeskTargetIndicator";
 
         internal const string MESS_INDICATOR_SHOW_CONDITION_ID = "messIndicatorShowCondition";
         internal const string MESS_INDICATOR_USE_MAX_SIZE_ID = "messIndicatorUseMaxSize";
@@ -73,6 +78,18 @@ namespace KitchenGameplayInfo
                     ShowCondition.Always,
                     new ShowCondition[] { ShowCondition.Never, ShowCondition.Always },
                     new string[] { "Disabled", "Enabled" })
+                .AddLabel("Show Desk Target Indicator")
+                .AddOption<ShowCondition>(
+                    SHOW_DESK_TARGET_INDICATOR_ID,
+                    ShowCondition.Always,
+                    new ShowCondition[] { ShowCondition.Never, ShowCondition.Always },
+                    new string[] { "Disabled", "Enabled" })
+                .AddLabel("More End Of Day Popup Details")
+                .AddOption<bool>(
+                    SHOW_END_OF_DAY_DISH_DETAILS_ID,
+                    true,
+                    new bool[] { false, true },
+                    new string[] { "Hide", "Show" })
                 .AddSpacer()
                 .AddSpacer();
 
@@ -81,6 +98,14 @@ namespace KitchenGameplayInfo
 
         public void PreInject()
         {
+            foreach (Appliance appliance in GameData.Main.Get<Appliance>())
+            {
+                if (appliance.Prefab == default ||
+                    !appliance.HasProperty<CDeskTarget>() ||
+                    appliance.Prefab.HasComponent<DeskTargetLineView>())
+                    continue;
+                appliance.Prefab.AddComponent<DeskTargetLineView>();
+            }
         }
 
         public void PostInject()
