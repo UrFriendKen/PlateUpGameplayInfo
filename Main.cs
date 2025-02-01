@@ -14,7 +14,7 @@ namespace KitchenGameplayInfo
     {
         public const string MOD_GUID = $"IcedMilo.PlateUp.{MOD_NAME}";
         public const string MOD_NAME = "GameplayInfo";
-        public const string MOD_VERSION = "0.1.7";
+        public const string MOD_VERSION = "0.1.8";
 
         internal const string CHAIR_ORDER_SHOW_CONDITION_ID = "chairOrderShowCondition";
         internal static readonly ViewType ChairOrderIndicatorViewType = (ViewType)HashUtils.GetID($"{MOD_GUID}:chairOrderIndicator");

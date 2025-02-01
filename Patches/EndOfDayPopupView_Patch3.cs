@@ -1,75 +1,64 @@
 ﻿using HarmonyLib;
 using Kitchen;
-using KitchenData;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using UnityEngine;
 
 namespace KitchenGameplayInfo.Patches
 {
     [HarmonyPatch]
-    static class EndOfDayPopupView_Patch
+    static class EndOfDayPopupView_Patch3
     {
         static readonly Type TARGET_TYPE = typeof(EndOfDayPopupView);
         const bool IS_ORIGINAL_LAMBDA_BODY = false;
         const int LAMBDA_BODY_INDEX = 0;
         const string TARGET_METHOD_NAME = "FirstUpdate";
-        const string DESCRIPTION = "Modify dish served text to include reward"; // Logging purpose of patch
+        const string DESCRIPTION = "Modify appliance text to include reward"; // Logging purpose of patch
 
         const int EXPECTED_MATCH_COUNT = 1;
 
-        static string GetDishItemText(Dish dish)
+        static string GetPlayerBonusText(string origText)
         {
-            if (Main.PrefManager.Get<bool>(Main.SHOW_END_OF_DAY_DISH_DETAILS_ID))
-            {
-                int minReward = 0;
-                int maxReward = 0;
-                if (dish.UnlockItemOverride)
-                {
-                    maxReward = dish.UnlockItemOverride.Reward;
-                }
-                else if (dish.UnlocksMenuItems.Count > 0)
-                {
-                    IEnumerable<int> rewards = dish.UnlocksMenuItems
-                        .Where(x => x.Item != default)
-                        .Select(x => x.Item.Reward);
-                    minReward = rewards.Min();
-                    maxReward = rewards.Max();
-                }
-                
-                if (minReward == maxReward)
-                    return $"{dish.Name} ({maxReward}<sprite name=\"coin\">)";
-                return $"{dish.Name} ({minReward}-{maxReward}<sprite name=\"coin\">)";
-            }
-            return dish.Name;
+            if (!Main.PrefManager.Get<bool>(Main.SHOW_END_OF_DAY_DISH_DETAILS_ID))
+                return origText;
+
+            return $"{origText} ({DifficultyHelpers.MoneyRewardPlayerModifier(Mathf.Clamp(Players.Main.All().Count, 1, int.MaxValue)) - 1f:0.0#}x)";
         }
 
         static readonly List<OpCode> OPCODES_TO_MATCH = new List<OpCode>()
         {
-            OpCodes.Ldloc_S,
+            OpCodes.Ldstr,
             OpCodes.Callvirt
         };
 
         // null is ignore
         static readonly List<object> OPERANDS_TO_MATCH = new List<object>()
         {
-            null,
-            typeof(Unlock).GetProperty("Name").GetGetMethod()
+            "MONEY_PLAYER",
+            null
         };
 
         static readonly List<OpCode> MODIFIED_OPCODES = new List<OpCode>()
         {
-            OpCodes.Ldloc_S,
-            OpCodes.Call
         };
 
         // null is ignore
         static readonly List<object> MODIFIED_OPERANDS = new List<object>()
         {
-            null,
-            typeof(EndOfDayPopupView_Patch).GetMethod("GetDishItemText", BindingFlags.NonPublic | BindingFlags.Static)
+        };
+
+        static readonly List<OpCode> INSERT_AFTER_OPCODES = new List<OpCode>()
+        {
+            OpCodes.Call
+        };
+
+        // null is ignore
+        static readonly List<object> INSERT_AFTER_OPERANDS = new List<object>()
+        {
+            typeof(EndOfDayPopupView_Patch3).GetMethod("GetPlayerBonusText", BindingFlags.NonPublic | BindingFlags.Static)
         };
 
         public static MethodBase TargetMethod()
@@ -161,6 +150,18 @@ namespace KitchenGameplayInfo.Patches
                                 list[replacementIndex].operand = MODIFIED_OPERANDS[k];
                                 Main.LogInfo($"Line {replacementIndex}: Replaced operand ({beforeChange ?? "null"} ==> {MODIFIED_OPERANDS[k] ?? "null"})");
                             }
+                        }
+
+                        // Perform Insertions After
+                        for (int k = 0; k < INSERT_AFTER_OPCODES.Count; k++)
+                        {
+                            int insertionIndex = i + OPCODES_TO_MATCH.Count + k;
+                            if (INSERT_AFTER_OPCODES[k] == null)
+                                continue;
+                            OpCode opcode = INSERT_AFTER_OPCODES[k];
+                            object operand = INSERT_AFTER_OPERANDS.Count > k ? INSERT_AFTER_OPERANDS[k] : null;
+                            list.Insert(insertionIndex, new CodeInstruction(opcode, operand));
+                            Main.LogInfo($"Line {insertionIndex}: Inserted CodeInstruction ({opcode} {operand})");
                         }
                     }
                 }

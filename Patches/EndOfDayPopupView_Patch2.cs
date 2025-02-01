@@ -6,57 +6,58 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using UnityEngine;
 
 namespace KitchenGameplayInfo.Patches
 {
     [HarmonyPatch]
-    static class EndOfDayPopupView_Patch
+    static class EndOfDayPopupView_Patch2
     {
         static readonly Type TARGET_TYPE = typeof(EndOfDayPopupView);
         const bool IS_ORIGINAL_LAMBDA_BODY = false;
         const int LAMBDA_BODY_INDEX = 0;
         const string TARGET_METHOD_NAME = "FirstUpdate";
-        const string DESCRIPTION = "Modify dish served text to include reward"; // Logging purpose of patch
+        const string DESCRIPTION = "Modify appliance text to include reward"; // Logging purpose of patch
 
         const int EXPECTED_MATCH_COUNT = 1;
 
-        static string GetDishItemText(Dish dish)
+        static string GetApplianceItemText(Appliance appliance)
         {
-            if (Main.PrefManager.Get<bool>(Main.SHOW_END_OF_DAY_DISH_DETAILS_ID))
+            if (!Main.PrefManager.Get<bool>(Main.SHOW_END_OF_DAY_DISH_DETAILS_ID))
+                return appliance.Name;
+
+            List<int> rewards = new List<int>();
+
+            IEnumerable<Type> appliancePropertyTypes = appliance.Properties.Where(x => x != default).Select(x => x.GetType());
+
+            foreach (IApplianceProperty prop in appliance.Properties)
             {
-                int minReward = 0;
-                int maxReward = 0;
-                if (dish.UnlockItemOverride)
-                {
-                    maxReward = dish.UnlockItemOverride.Reward;
-                }
-                else if (dish.UnlocksMenuItems.Count > 0)
-                {
-                    IEnumerable<int> rewards = dish.UnlocksMenuItems
-                        .Where(x => x.Item != default)
-                        .Select(x => x.Item.Reward);
-                    minReward = rewards.Min();
-                    maxReward = rewards.Max();
-                }
-                
-                if (minReward == maxReward)
-                    return $"{dish.Name} ({maxReward}<sprite name=\"coin\">)";
-                return $"{dish.Name} ({minReward}-{maxReward}<sprite name=\"coin\">)";
+                if (prop is CAccelerateTimeAfterDuration)
+                    rewards.Add(3 + Mathf.Clamp(GameInfo.CurrentDay, 0, int.MaxValue) / 2);
             }
-            return dish.Name;
+
+            if (rewards.Count == 0)
+                return appliance.Name;
+
+            int minReward = rewards.Min();
+            int maxReward = rewards.Sum();
+
+            if (minReward == maxReward)
+                return $"{appliance.Name} ({maxReward}<sprite name=\"coin\">)";
+            return $"{appliance.Name} ({minReward}-{maxReward}<sprite name=\"coin\">)";
         }
 
         static readonly List<OpCode> OPCODES_TO_MATCH = new List<OpCode>()
         {
             OpCodes.Ldloc_S,
-            OpCodes.Callvirt
+            OpCodes.Ldfld
         };
 
         // null is ignore
         static readonly List<object> OPERANDS_TO_MATCH = new List<object>()
         {
             null,
-            typeof(Unlock).GetProperty("Name").GetGetMethod()
+            typeof(Appliance).GetField("Name")
         };
 
         static readonly List<OpCode> MODIFIED_OPCODES = new List<OpCode>()
@@ -69,7 +70,7 @@ namespace KitchenGameplayInfo.Patches
         static readonly List<object> MODIFIED_OPERANDS = new List<object>()
         {
             null,
-            typeof(EndOfDayPopupView_Patch).GetMethod("GetDishItemText", BindingFlags.NonPublic | BindingFlags.Static)
+            typeof(EndOfDayPopupView_Patch2).GetMethod("GetApplianceItemText", BindingFlags.NonPublic | BindingFlags.Static)
         };
 
         public static MethodBase TargetMethod()
