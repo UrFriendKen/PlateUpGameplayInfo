@@ -6,6 +6,7 @@ using KitchenGameplayInfo.Utils;
 using KitchenMods;
 using PreferenceSystem;
 using System.Reflection;
+using UnityEngine;
 
 // Namespace should have "Kitchen" in the beginning
 namespace KitchenGameplayInfo
@@ -14,7 +15,7 @@ namespace KitchenGameplayInfo
     {
         public const string MOD_GUID = $"IcedMilo.PlateUp.{MOD_NAME}";
         public const string MOD_NAME = "GameplayInfo";
-        public const string MOD_VERSION = "0.1.8";
+        public const string MOD_VERSION = "0.1.9";
 
         internal const string CHAIR_ORDER_SHOW_CONDITION_ID = "chairOrderShowCondition";
         internal static readonly ViewType ChairOrderIndicatorViewType = (ViewType)HashUtils.GetID($"{MOD_GUID}:chairOrderIndicator");
@@ -44,14 +45,14 @@ namespace KitchenGameplayInfo
             PrefManager = new PreferenceSystemManager(MOD_GUID, MOD_NAME);
             PrefManager
                 .AddLabel("Show Chair Order")
-                .AddConditionalBlocker(() => Session.CurrentGameNetworkMode != GameNetworkMode.Host)
+                .AddConditionalBlocker(() => Session.HostIdentifier != 0)
                     .AddOption<ShowCondition>(
                         CHAIR_ORDER_SHOW_CONDITION_ID,
                         ShowCondition.Always,
                         new ShowCondition[] { ShowCondition.Never, ShowCondition.BeingLookedAt, ShowCondition.Always },
                         new string[] { "Never", "When Being Looked At", "Always" })
                 .ConditionalBlockerDone()
-                .AddConditionalBlocker(() => Session.CurrentGameNetworkMode == GameNetworkMode.Host)
+                .AddConditionalBlocker(() => Session.HostIdentifier == 0)
                     .AddInfo("Follows host preference")
                 .ConditionalBlockerDone()
                 .AddLabel("Show Mess Indicators")

@@ -8,7 +8,7 @@ namespace KitchenGameplayInfo
     {
         protected override ViewType ViewType => Main.ChairOrderIndicatorViewType;
 
-        protected override EntityQuery GetSearchQuery()
+        protected override EntityQuery GetCandidateQuery()
         {
             return GetEntityQuery(typeof(CApplianceGhostChair), typeof(CPosition));
         }
